@@ -1,0 +1,13 @@
+com/distributed/homework/exception/GlobalExceptionHandler$ErrorDetails.class
+com/distributed/homework/HomeworkApplication.class
+com/distributed/homework/config/XmlConfig.class
+com/distributed/homework/exception/GlobalExceptionHandler.class
+com/distributed/homework/controller/StudentController.class
+com/distributed/homework/model/StudentList.class
+com/distributed/homework/service/StudentService.class
+com/distributed/homework/controller/StudentXmlController.class
+com/distributed/homework/service/StudentServiceImpl.class
+com/distributed/homework/service/XmlService.class
+com/distributed/homework/config/DataInitializer.class
+com/distributed/homework/model/Student.class
+com/distributed/homework/repository/StudentRepository.class
