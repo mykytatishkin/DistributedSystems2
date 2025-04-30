@@ -125,3 +125,67 @@ mvn test
   <age>20</age>
 </student>
 ``` 
+
+# Student REST API Endpoints
+
+Get All Students
+http://localhost:8080/api/students
+
+Get Student by ID
+http://localhost:8080/api/students/{id}
+Example: http://localhost:8080/api/students/1
+
+Create Student
+http://localhost:8080/api/students
+
+Update Student
+http://localhost:8080/api/students/{id}
+Example: http://localhost:8080/api/students/1
+
+Delete Student
+http://localhost:8080/api/students/{id}
+Example: http://localhost:8080/api/students/1
+
+Find Students by Last Name
+http://localhost:8080/api/students/search?lastName={lastName}
+Example: http://localhost:8080/api/students/search?lastName=Smith
+
+Find Students by Minimum Age
+http://localhost:8080/api/students/search?minAge={age}
+Example: http://localhost:8080/api/students/search?minAge=20
+
+XML Export Endpoints
+Export All Students to XML
+http://localhost:8080/api/students/export/all
+
+Export Students by Last Name to XML
+http://localhost:8080/api/students/export?lastName={lastName}
+Example: http://localhost:8080/api/students/export?lastName=Smith
+
+Export Students by Minimum Age to XML
+http://localhost:8080/api/students/export?minAge={age}
+Example: http://localhost:8080/api/students/export?minAge=20
+
+## Additional Endpoints
+H2 Console
+http://localhost:8080/h2-console
+
+Actuator Endpoints
+http://localhost:8080/actuator
+http://localhost:8080/actuator/health
+http://localhost:8080/actuator/info
+http://localhost:8080/actuator/metrics
+http://localhost:8080/actuator/env
+http://localhost:8080/actuator/beans
+
+And other actuator endpoints enabled in your configuration
+
+# To launch app
+`cd config-server`
+`mvn spring-boot:run`
+
+`cd discovery-server`
+`mvn spring-boot:run`
+
+`cd SpringBootApp`
+`mvn spring-boot:run`
