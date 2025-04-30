@@ -181,11 +181,13 @@ http://localhost:8080/actuator/beans
 And other actuator endpoints enabled in your configuration
 
 # To launch app
+`cd discovery-server`
+`mvn spring-boot:run`
+
+
 `cd config-server`
 `mvn spring-boot:run`
 
-`cd discovery-server`
-`mvn spring-boot:run`
 
 `cd SpringBootApp`
 `mvn spring-boot:run`
