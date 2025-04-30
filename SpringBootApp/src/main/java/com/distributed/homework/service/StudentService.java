@@ -57,4 +57,11 @@ public interface StudentService {
      * @return list of matching students
      */
     List<Student> findStudentsByMinimumAge(int age);
+    
+    /**
+     * Find students by major
+     * @param major the major to search for
+     * @return list of matching students
+     */
+    List<Student> findStudentsByMajor(String major);
 } 

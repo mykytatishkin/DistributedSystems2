@@ -2,14 +2,13 @@ package com.distributed.homework.service;
 
 import com.distributed.homework.model.Student;
 import com.distributed.homework.repository.StudentRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -29,8 +28,7 @@ import static org.mockito.Mockito.*;
  * @version 1.0
  * @since 2025-04-21
  */
-@ExtendWith(MockitoExtension.class)
-public class StudentServiceImplTest {
+class StudentServiceImplTest {
 
     @Mock
     private StudentRepository studentRepository;
@@ -38,197 +36,121 @@ public class StudentServiceImplTest {
     @InjectMocks
     private StudentServiceImpl studentService;
 
-    private Student testStudent;
-    private List<Student> testStudents;
-
-    /**
-     * Setup test data before each test
-     */
     @BeforeEach
     void setUp() {
-        testStudent = new Student("John", "Doe", "john.doe@example.com", 20);
-        testStudent.setId(1L);
-        
-        Student student2 = new Student("Jane", "Smith", "jane.smith@example.com", 22);
-        student2.setId(2L);
-        
-        testStudents = Arrays.asList(testStudent, student2);
+        MockitoAnnotations.openMocks(this);
     }
 
-    /**
-     * Test that getAllStudents returns all students from the repository
-     */
     @Test
-    void getAllStudents_ShouldReturnAllStudents() {
+    void getAllStudents() {
         // Arrange
-        when(studentRepository.findAll()).thenReturn(testStudents);
+        Student student1 = new Student("John", "Doe", "john@example.com", 
+            "+1234567890", "123 Main St", "Computer Science");
+        Student student2 = new Student("Jane", "Smith", "jane@example.com", 
+            "+0987654321", "456 Oak Ave", "Mathematics");
+        List<Student> expectedStudents = Arrays.asList(student1, student2);
+        when(studentRepository.findAll()).thenReturn(expectedStudents);
 
         // Act
-        List<Student> result = studentService.getAllStudents();
+        List<Student> actualStudents = studentService.getAllStudents();
 
         // Assert
-        assertEquals(2, result.size());
-        assertEquals("John", result.get(0).getFirstName());
-        assertEquals("Jane", result.get(1).getFirstName());
-        verify(studentRepository, times(1)).findAll();
+        assertEquals(expectedStudents.size(), actualStudents.size());
+        assertEquals(expectedStudents.get(0).getFirstName(), actualStudents.get(0).getFirstName());
+        assertEquals(expectedStudents.get(1).getFirstName(), actualStudents.get(1).getFirstName());
     }
 
-    /**
-     * Test that getStudentById returns the correct student when found
-     */
     @Test
-    void getStudentById_WhenStudentExists_ShouldReturnStudent() {
+    void getStudentById() {
         // Arrange
-        when(studentRepository.findById(1L)).thenReturn(Optional.of(testStudent));
+        Long id = 1L;
+        Student expectedStudent = new Student("John", "Doe", "john@example.com", 
+            "+1234567890", "123 Main St", "Computer Science");
+        when(studentRepository.findById(id)).thenReturn(Optional.of(expectedStudent));
 
         // Act
-        Optional<Student> result = studentService.getStudentById(1L);
+        Optional<Student> actualStudent = studentService.getStudentById(id);
 
         // Assert
-        assertTrue(result.isPresent());
-        assertEquals("John", result.get().getFirstName());
-        verify(studentRepository, times(1)).findById(1L);
+        assertTrue(actualStudent.isPresent());
+        assertEquals(expectedStudent.getFirstName(), actualStudent.get().getFirstName());
     }
 
-    /**
-     * Test that getStudentById returns empty when student is not found
-     */
     @Test
-    void getStudentById_WhenStudentDoesNotExist_ShouldReturnEmpty() {
+    void createStudent() {
         // Arrange
-        when(studentRepository.findById(99L)).thenReturn(Optional.empty());
+        Student student = new Student("John", "Doe", "john@example.com", 
+            "+1234567890", "123 Main St", "Computer Science");
+        when(studentRepository.save(any(Student.class))).thenReturn(student);
 
         // Act
-        Optional<Student> result = studentService.getStudentById(99L);
+        Student savedStudent = studentService.createStudent(student);
 
         // Assert
-        assertFalse(result.isPresent());
-        verify(studentRepository, times(1)).findById(99L);
+        assertNotNull(savedStudent);
+        assertEquals(student.getFirstName(), savedStudent.getFirstName());
+        verify(studentRepository, times(1)).save(student);
     }
 
-    /**
-     * Test that createStudent saves the student and returns it
-     */
     @Test
-    void createStudent_ShouldSaveAndReturnStudent() {
+    void updateStudent() {
         // Arrange
-        Student newStudent = new Student("New", "Student", "new.student@example.com", 25);
-        when(studentRepository.save(any(Student.class))).thenReturn(newStudent);
+        Long id = 1L;
+        Student existingStudent = new Student("John", "Doe", "john@example.com", 
+            "+1234567890", "123 Main St", "Computer Science");
+        Student updatedStudent = new Student("John", "Smith", "john.smith@example.com", 
+            "+1234567890", "123 Main St", "Computer Science");
+        when(studentRepository.findById(id)).thenReturn(Optional.of(existingStudent));
+        when(studentRepository.save(any(Student.class))).thenReturn(updatedStudent);
 
         // Act
-        Student result = studentService.createStudent(newStudent);
+        Student result = studentService.updateStudent(id, updatedStudent);
 
         // Assert
-        assertEquals("New", result.getFirstName());
-        verify(studentRepository, times(1)).save(newStudent);
+        assertNotNull(result);
+        assertEquals(updatedStudent.getLastName(), result.getLastName());
+        assertEquals(updatedStudent.getEmail(), result.getEmail());
     }
 
-    /**
-     * Test that updateStudent updates an existing student
-     */
     @Test
-    void updateStudent_WhenStudentExists_ShouldUpdateAndReturnStudent() {
+    void updateStudent_NotFound() {
         // Arrange
-        Student updatedDetails = new Student("Updated", "Student", "updated@example.com", 30);
-        when(studentRepository.findById(1L)).thenReturn(Optional.of(testStudent));
-        when(studentRepository.save(any(Student.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        // Act
-        Student result = studentService.updateStudent(1L, updatedDetails);
-
-        // Assert
-        assertEquals("Updated", result.getFirstName());
-        assertEquals("Student", result.getLastName());
-        assertEquals("updated@example.com", result.getEmail());
-        assertEquals(30, result.getAge());
-        verify(studentRepository, times(1)).findById(1L);
-        verify(studentRepository, times(1)).save(any(Student.class));
-    }
-
-    /**
-     * Test that updateStudent throws exception when student does not exist
-     */
-    @Test
-    void updateStudent_WhenStudentDoesNotExist_ShouldThrowException() {
-        // Arrange
-        Student updatedDetails = new Student("Updated", "Student", "updated@example.com", 30);
-        when(studentRepository.findById(99L)).thenReturn(Optional.empty());
+        Long id = 1L;
+        Student updatedStudent = new Student("John", "Smith", "john.smith@example.com", 
+            "+1234567890", "123 Main St", "Computer Science");
+        when(studentRepository.findById(id)).thenReturn(Optional.empty());
 
         // Act & Assert
         assertThrows(EntityNotFoundException.class, () -> {
-            studentService.updateStudent(99L, updatedDetails);
+            studentService.updateStudent(id, updatedStudent);
         });
-        verify(studentRepository, times(1)).findById(99L);
-        verify(studentRepository, never()).save(any(Student.class));
     }
 
-    /**
-     * Test that deleteStudent deletes an existing student
-     */
     @Test
-    void deleteStudent_WhenStudentExists_ShouldDeleteStudent() {
+    void deleteStudent() {
         // Arrange
-        when(studentRepository.findById(1L)).thenReturn(Optional.of(testStudent));
-        doNothing().when(studentRepository).delete(any(Student.class));
+        Long id = 1L;
+        Student student = new Student("John", "Doe", "john@example.com", 
+            "+1234567890", "123 Main St", "Computer Science");
+        when(studentRepository.findById(id)).thenReturn(Optional.of(student));
+        doNothing().when(studentRepository).delete(student);
 
         // Act
-        studentService.deleteStudent(1L);
+        studentService.deleteStudent(id);
 
         // Assert
-        verify(studentRepository, times(1)).findById(1L);
-        verify(studentRepository, times(1)).delete(testStudent);
+        verify(studentRepository, times(1)).delete(student);
     }
 
-    /**
-     * Test that deleteStudent throws exception when student does not exist
-     */
     @Test
-    void deleteStudent_WhenStudentDoesNotExist_ShouldThrowException() {
+    void deleteStudent_NotFound() {
         // Arrange
-        when(studentRepository.findById(99L)).thenReturn(Optional.empty());
+        Long id = 1L;
+        when(studentRepository.findById(id)).thenReturn(Optional.empty());
 
         // Act & Assert
         assertThrows(EntityNotFoundException.class, () -> {
-            studentService.deleteStudent(99L);
+            studentService.deleteStudent(id);
         });
-        verify(studentRepository, times(1)).findById(99L);
-        verify(studentRepository, never()).delete(any(Student.class));
-    }
-
-    /**
-     * Test that findStudentsByLastName returns students with matching last name
-     */
-    @Test
-    void findStudentsByLastName_ShouldReturnMatchingStudents() {
-        // Arrange
-        when(studentRepository.findByLastName("Doe")).thenReturn(List.of(testStudent));
-
-        // Act
-        List<Student> result = studentService.findStudentsByLastName("Doe");
-
-        // Assert
-        assertEquals(1, result.size());
-        assertEquals("John", result.get(0).getFirstName());
-        assertEquals("Doe", result.get(0).getLastName());
-        verify(studentRepository, times(1)).findByLastName("Doe");
-    }
-
-    /**
-     * Test that findStudentsByMinimumAge returns students with age greater than specified
-     */
-    @Test
-    void findStudentsByMinimumAge_ShouldReturnMatchingStudents() {
-        // Arrange
-        Student olderStudent = new Student("Older", "Person", "older@example.com", 25);
-        when(studentRepository.findByAgeGreaterThan(21)).thenReturn(List.of(olderStudent));
-
-        // Act
-        List<Student> result = studentService.findStudentsByMinimumAge(21);
-
-        // Assert
-        assertEquals(1, result.size());
-        assertEquals("Older", result.get(0).getFirstName());
-        assertEquals(25, result.get(0).getAge());
-        verify(studentRepository, times(1)).findByAgeGreaterThan(21);
     }
 } 

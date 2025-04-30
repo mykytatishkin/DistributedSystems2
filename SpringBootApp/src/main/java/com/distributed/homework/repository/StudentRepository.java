@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository interface for Student entities
@@ -20,9 +21,30 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     List<Student> findByLastName(String lastName);
     
     /**
-     * Find students with age greater than the specified value
-     * @param age the minimum age
+     * Find students by their department
+     * @param department the department to search for
      * @return list of matching students
      */
-    List<Student> findByAgeGreaterThan(int age);
+    List<Student> findByDepartment(String department);
+    
+    /**
+     * Find a student by their email
+     * @param email the email to search for
+     * @return the student with the specified email
+     */
+    Optional<Student> findByEmail(String email);
+    
+    /**
+     * Find students by their phone number
+     * @param phoneNumber the phone number to search for
+     * @return list of matching students
+     */
+    List<Student> findByPhoneNumber(String phoneNumber);
+    
+    /**
+     * Find students by their address
+     * @param address the address to search for
+     * @return list of matching students
+     */
+    List<Student> findByAddressContaining(String address);
 } 

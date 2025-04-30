@@ -8,19 +8,22 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for the StudentXmlController class
@@ -52,10 +55,13 @@ public class StudentXmlControllerTest {
      */
     @BeforeEach
     void setUp() {
-        Student student1 = new Student("John", "Doe", "john.doe@example.com", 20);
+        MockitoAnnotations.openMocks(this);
+        Student student1 = new Student("John", "Doe", "john@example.com", 
+            "+1234567890", "123 Main St", "Computer Science");
         student1.setId(1L);
         
-        Student student2 = new Student("Jane", "Smith", "jane.smith@example.com", 22);
+        Student student2 = new Student("Jane", "Smith", "jane@example.com", 
+            "+0987654321", "456 Oak Ave", "Mathematics");
         student2.setId(2L);
         
         testStudents = Arrays.asList(student1, student2);
@@ -127,5 +133,73 @@ public class StudentXmlControllerTest {
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody().contains("/path/to/age-students.xml"));
+    }
+
+    @Test
+    void uploadStudents() throws IOException {
+        // Arrange
+        String xmlContent = """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <students>
+                <student>
+                    <firstName>John</firstName>
+                    <lastName>Doe</lastName>
+                    <email>john@example.com</email>
+                    <phoneNumber>+1234567890</phoneNumber>
+                    <address>123 Main St</address>
+                    <major>Computer Science</major>
+                </student>
+            </students>
+            """;
+        MultipartFile file = new MockMultipartFile("students.xml", xmlContent.getBytes());
+        List<Student> students = Arrays.asList(
+            new Student("John", "Doe", "john@example.com", 
+                "+1234567890", "123 Main St", "Computer Science")
+        );
+        when(xmlService.parseXmlFile(any(MultipartFile.class))).thenReturn(students);
+        when(studentService.createStudent(any(Student.class))).thenReturn(students.get(0));
+
+        // Act
+        ResponseEntity<String> response = studentXmlController.uploadStudents(file);
+
+        // Assert
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        verify(studentService, times(1)).createStudent(any(Student.class));
+    }
+
+    @Test
+    void downloadStudents() {
+        // Arrange
+        List<Student> students = Arrays.asList(
+            new Student("John", "Doe", "john@example.com", 
+                "+1234567890", "123 Main St", "Computer Science"),
+            new Student("Jane", "Smith", "jane@example.com", 
+                "+0987654321", "456 Oak Ave", "Mathematics")
+        );
+        when(studentService.getAllStudents()).thenReturn(students);
+        when(xmlService.generateXml(anyList())).thenReturn("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+
+        // Act
+        ResponseEntity<byte[]> response = studentXmlController.downloadStudents();
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("application/xml", response.getHeaders().getContentType().toString());
+        assertTrue(response.getHeaders().getContentDisposition().toString().contains("students.xml"));
+    }
+
+    @Test
+    void uploadStudents_InvalidXml() throws IOException {
+        // Arrange
+        String invalidXml = "invalid xml content";
+        MultipartFile file = new MockMultipartFile("invalid.xml", invalidXml.getBytes());
+        when(xmlService.parseXmlFile(any(MultipartFile.class))).thenThrow(new IOException());
+
+        // Act
+        ResponseEntity<String> response = studentXmlController.uploadStudents(file);
+
+        // Assert
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        verify(studentService, never()).createStudent(any(Student.class));
     }
 } 

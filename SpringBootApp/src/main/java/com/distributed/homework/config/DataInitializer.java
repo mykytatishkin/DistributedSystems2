@@ -2,34 +2,30 @@ package com.distributed.homework.config;
 
 import com.distributed.homework.model.Student;
 import com.distributed.homework.repository.StudentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * Initialize sample data for testing purposes
  */
-@Component
-public class DataInitializer implements CommandLineRunner {
+@Configuration
+public class DataInitializer {
 
-    private final StudentRepository studentRepository;
+    @Bean
+    public CommandLineRunner initData(StudentRepository studentRepository) {
+        return args -> {
+            // Create some initial students
+            Student student1 = new Student("John", "Doe", "john@example.com", 
+                "+1234567890", "123 Main St", "Computer Science");
+            Student student2 = new Student("Jane", "Smith", "jane@example.com", 
+                "+0987654321", "456 Oak Ave", "Mathematics");
+            Student student3 = new Student("Bob", "Johnson", "bob@example.com", 
+                "+1122334455", "789 Pine St", "Physics");
 
-    @Autowired
-    public DataInitializer(StudentRepository studentRepository) {
-        this.studentRepository = studentRepository;
-    }
-
-    @Override
-    public void run(String... args) {
-        // Add some sample data only if repository is empty
-        if (studentRepository.count() == 0) {
-            studentRepository.save(new Student("John", "Doe", "john.doe@example.com", 20));
-            studentRepository.save(new Student("Jane", "Smith", "jane.smith@example.com", 22));
-            studentRepository.save(new Student("Bob", "Johnson", "bob.johnson@example.com", 21));
-            studentRepository.save(new Student("Alice", "Brown", "alice.brown@example.com", 19));
-            studentRepository.save(new Student("Charlie", "Davis", "charlie.davis@example.com", 23));
-            
-            System.out.println("Sample data initialized successfully!");
-        }
+            studentRepository.save(student1);
+            studentRepository.save(student2);
+            studentRepository.save(student3);
+        };
     }
 } 

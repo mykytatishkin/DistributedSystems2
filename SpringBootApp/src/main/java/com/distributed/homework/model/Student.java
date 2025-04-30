@@ -1,13 +1,13 @@
 package com.distributed.homework.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * Entity class representing a Student
@@ -32,17 +32,25 @@ public class Student {
     private String email;
 
     @XmlElement
-    private int age;
+    private String phoneNumber;
+
+    @XmlElement
+    private String address;
+
+    @XmlElement
+    private String department;
 
     // Default constructor required by JPA
     public Student() {
     }
 
-    public Student(String firstName, String lastName, String email, int age) {
+    public Student(String firstName, String lastName, String email, String phoneNumber, String address, String department) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
-        this.age = age;
+        this.phoneNumber = phoneNumber;
+        this.address = address;
+        this.department = department;
     }
 
     // Getters and Setters
@@ -78,12 +86,28 @@ public class Student {
         this.email = email;
     }
 
-    public int getAge() {
-        return age;
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
 
-    public void setAge(int age) {
-        this.age = age;
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
     }
 
     @Override
@@ -93,7 +117,9 @@ public class Student {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
-                ", age=" + age +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", address='" + address + '\'' +
+                ", department='" + department + '\'' +
                 '}';
     }
 } 
